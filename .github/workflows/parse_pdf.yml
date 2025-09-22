@@ -23,7 +23,7 @@ jobs:
 
       - name: Parse PDF
         run: |
-          python parse_groupes_all.py
+          python parser_groupes_all.py
 
       - name: Get upload URL for release
         id: get_upload_url
