@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   parse_and_release:
     runs-on: ubuntu-latest
@@ -14,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -22,21 +25,31 @@ jobs:
         run: pip install -r requirements.txt jpype1
 
       - name: Parse PDF
-        run: |
-          python parser_groupes_all.py
+        run: python parser_groupes_all.py
 
-      - name: Get upload URL for release
-        id: get_upload_url
-        run: |
-          echo "upload_url=https://uploads.github.com/repos/${{ github.repository }}/releases/assets" >> $GITHUB_OUTPUT
+      - name: Generate tag name
+        id: tag
+        run: echo "TAG_NAME=v$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-      - name: Release PDF
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
         with:
-          files: output.pdf
-          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
+          tag_name: ${{ steps.tag.outputs.TAG_NAME }}
+          name: "Release ${{ steps.tag.outputs.TAG_NAME }}"
+          body: "Automated release of results from PDF parsing."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload resultats.json to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./resultats.json
+          asset_name: resultats.json
+          asset_content_type: application/json
 
       - name: Clean up
         run: echo "Cleanup done"
