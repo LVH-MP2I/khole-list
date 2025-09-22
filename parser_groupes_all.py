@@ -23,6 +23,5 @@ if __name__ == "__main__":
     tables = tabula.read_pdf(file_path, pages="all", multiple_tables=True, lattice=True)
     df = tables[0]
     resultats = parser_groupes_par_semaine(df)
-    print(resultats)
     with open("resultats.json", "w") as f:
         json.dump(resultats, f, indent=2)
