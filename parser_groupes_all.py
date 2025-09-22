@@ -1,5 +1,6 @@
 import pandas as pd
 import tabula
+import json
 
 def parser_groupes_par_semaine(df, semaine_start=4):
     semaine_cols = df.columns[semaine_start:]
@@ -23,7 +24,5 @@ if __name__ == "__main__":
     df = tables[0]
     resultats = parser_groupes_par_semaine(df)
     print(resultats)
-    # Optionnel: écrire dans un fichier
-    import json
     with open("resultats.json", "w") as f:
         json.dump(resultats, f, indent=2)

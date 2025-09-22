@@ -1,9 +1,12 @@
-name: PDF parser
+name: PDF parser & release
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  parse:
+  parse_and_release:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -22,3 +25,24 @@ jobs:
     - name: Run PDF parser
       run: |
         python parser_groupes_all.py
+
+    - name: Get current tag
+      id: get_tag
+      run: echo "::set-output name=TAG_NAME::v$(date +'%Y%m%d%H%M%S')"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.get_tag.outputs.TAG_NAME }}
+        name: "Release ${{ steps.get_tag.outputs.TAG_NAME }}"
+        body: "Automated release of results from PDF parsing."
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload resultats.json to release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: resultats.json
+        tag_name: ${{ steps.get_tag.outputs.TAG_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
