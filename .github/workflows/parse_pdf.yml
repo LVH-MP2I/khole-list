@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   parse_and_release:
     runs-on: ubuntu-latest
@@ -28,7 +31,7 @@ jobs:
 
     - name: Get current tag
       id: get_tag
-      run: echo "::set-output name=TAG_NAME::v$(date +'%Y%m%d%H%M%S')"
+      run: echo "TAG_NAME=v$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
